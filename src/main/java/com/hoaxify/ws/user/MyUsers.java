@@ -11,9 +11,9 @@ public class MyUsers {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String username;
-    private String display_name;
+    private String displayName;
     private String password;
-    private String re_password;
+    private String rePassword;
 
 
 }

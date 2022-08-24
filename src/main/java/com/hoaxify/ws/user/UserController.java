@@ -1,13 +1,20 @@
 package com.hoaxify.ws.user;
 
+import com.hoaxify.ws.error.ApiError;
 import com.hoaxify.ws.shared.GenericResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 public class UserController {
@@ -18,17 +25,42 @@ public class UserController {
     UserService userService;
 
 
-//Bu HTTP request'i ile erişilecek. Rest'e bir entity eklenecekse POST metodu kullanılır. Bu metodun POST metotlarını çalıştıracağını göstermek adına POSTMAPPING isminde bir annotion ile; bu metodun POST edeceğini söylüyoruz.
-
     @CrossOrigin
     @PostMapping("/api/1.0/users")
-    //@RequestBody annotion'ı ile; formdan gelen data bu metoda hizmet edecektir. Gelen request içindeki Body'i bize ver.
-    public GenericResponse createUser(@RequestBody MyUsers user) {
-        userService.save(user);
-        logger.info(user.toString()); //gelen body ekrana yansıtılır.
+    public ResponseEntity<?> createUser(@RequestBody MyUsers user) {
 
-        GenericResponse response = new GenericResponse();
-        response.setMessage("User Created.");
-        return response;
+        ApiError error = new ApiError(400, "Validation Error", "/api/1.0/users");
+        Map<String, String> validationErrors = new HashMap<>();
+
+        String username = user.getUsername();
+        String displayName = user.getDisplayName();
+        String password = user.getPassword();
+        String rePassword = user.getRePassword();
+
+        if (username == null || username.isEmpty()) {
+            validationErrors.put("username", "Username cannot be null");
+        }
+
+        if (displayName == null || displayName.isEmpty()) {
+            validationErrors.put("displayName", "Display Name cannot be null");
+        }
+
+        if (password == null || password.isEmpty()) {
+            validationErrors.put("password", "Password cannot be null");
+        }
+        if (rePassword == null || rePassword.isEmpty()) {
+            validationErrors.put("rePassword", "Re-Password cannot be null");
+        }
+
+        if (validationErrors.size() > 0) {
+            error.setValidationErrors(validationErrors);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+
+        logger.info(user.toString());
+        userService.save(user);
+        return ResponseEntity.ok(new GenericResponse("User is created."));
+
+
     }
 }
