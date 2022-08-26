@@ -5,14 +5,15 @@ import com.hoaxify.ws.shared.GenericResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
+//import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,17 +28,16 @@ public class UserController {
 
     @CrossOrigin
     @PostMapping("/api/1.0/users")
-    public ResponseEntity<?> createUser(@RequestBody MyUsers user) {
+    public GenericResponse createUser(@Valid @RequestBody MyUsers user) {
 
-        ApiError error = new ApiError(400, "Validation Error", "/api/1.0/users");
-        Map<String, String> validationErrors = new HashMap<>();
-
+/*   //Codes before Jakarta Bean Validation
         String username = user.getUsername();
         String displayName = user.getDisplayName();
         String password = user.getPassword();
         String rePassword = user.getRePassword();
 
-        if (username == null || username.isEmpty()) {
+
+        * if (username == null || username.isEmpty()) {
             validationErrors.put("username", "Username cannot be null");
         }
 
@@ -56,11 +56,22 @@ public class UserController {
             error.setValidationErrors(validationErrors);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
         }
-
+        *
+        * */
         logger.info(user.toString());
         userService.save(user);
-        return ResponseEntity.ok(new GenericResponse("User is created."));
+        return new GenericResponse("User is created.");
+    }
 
-
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleValidationException(MethodArgumentNotValidException exception) {
+        ApiError error = new ApiError(400, "Validation Error", "/api/1.0/users");
+        Map<String, String> validationErrors = new HashMap<>();
+        for (FieldError fieldError : exception.getBindingResult().getFieldErrors()) {
+            validationErrors.put(fieldError.getField(), fieldError.getDefaultMessage());
+        }
+        error.setValidationErrors(validationErrors);
+        return error;
     }
 }
