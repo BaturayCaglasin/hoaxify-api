@@ -19,8 +19,10 @@ public class MyUsers {
 
     @NotNull
     @Size(min=4, max = 255)
+    @UniqueUsername
     private String username;
     @NotNull
+    @Column(unique = true)
     private String displayName;
     @NotNull
     @Size(min=4, max = 255)
