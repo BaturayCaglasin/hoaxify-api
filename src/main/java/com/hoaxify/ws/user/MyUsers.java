@@ -17,14 +17,14 @@ public class MyUsers {
     private Long id;
 
 
-    @NotNull
+    @NotNull(message = "{hoaxify.constraint.username.NotNull.message}")
     @Size(min=4, max = 255)
     @UniqueUsername
     private String username;
-    @NotNull
+    @NotNull(message = "{hoaxify.constraint.displayname.NotNull.message}")
     @Column(unique = true)
     private String displayName;
-    @NotNull
+    @NotNull(message = "{hoaxify.constraint.password.NotNull.message}")
     @Size(min=4, max = 255)
     @Pattern(regexp="^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).*$")
     private String password;
