@@ -12,9 +12,9 @@ public class UserService {
     PasswordEncoder passwordEncoder;
 
 
-    public UserService(UsersRepository usersRepository) {
+    public UserService(UsersRepository usersRepository, PasswordEncoder passwordEncoder) {
         this.usersRepository = usersRepository;
-        this.passwordEncoder = new BCryptPasswordEncoder();
+        this.passwordEncoder = passwordEncoder;
     }
 
 

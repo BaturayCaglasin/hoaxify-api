@@ -33,5 +33,6 @@ public class MyUsers {
     @Pattern(regexp="^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).*$")
     private String rePassword;
 
+    private String image;
 
 }
